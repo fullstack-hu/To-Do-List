@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Todo App</title>
+  <style>
+ body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: #030323;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  width: 400px;
+  background: #161646;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 0 15px #6c63ff;
+  text-align: center;
+}
+
+.todo-header h2 {
+  margin: 0;
+}
+
+.progress-container {
+  position: relative;
+  margin-top: 10px;
+  background: #333;
+  border-radius: 10px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 10px;
+  background: cyan;
+  width: 0%;
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-count {
+  margin-top: 5px;
+  font-weight: bold;
+  color: #aaa;
+}
+
+.task-input {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.task-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+.task-input button {
+  padding: 10px;
+  border-radius: 50%;
+  border: none;
+  background: #7d70ff;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+ul#taskList {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+li.task {
+  background: #1c1c4d;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: cyan;
+}
+
+.task input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.task button {
+  background: none;
+  border: none;
+  color: #f55;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.congrats {
+  margin-top: 20px;
+  padding: 15px;
+  background: #4caf50;
+  color: white;
+  border-radius: 10px;
+  display: none;
+  animation: popUp 0.6s ease-out forwards;
+}
+
+@keyframes popUp {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="todo-header">
+      <h2>Todo App</h2>
+      <p>Keep it up!</p>
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-count" id="progressCount">0 / 0</div>
+      </div>
+    </div>
+
+    <div class="task-input">
+      <input type="text" id="taskInput" placeholder="Write your task" />
+      <button id="addTask">+</button>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <div class="congrats" id="congrats">
+      🎉 Congratulations! You finished all your tasks! 🎉
+    </div>
+  </div>
+
+  <script>
+const taskInput = document.getElementById("taskInput");
+const addTaskBtn = document.getElementById("addTask");
+const taskList = document.getElementById("taskList");
+const progressBar = document.getElementById("progressBar");
+const progressCount = document.getElementById("progressCount");
+const congrats = document.getElementById("congrats");
+
+let tasks = [];
+
+function updateProgress() {
+  const total = tasks.length;   // number of all tasks.
+  const completed = tasks.filter(task => task.done).length; // completed counts how many tasks are marked as done using .filter()
+
+  if (total > 0) {
+    progressBar.style.width = `${(completed / total) * 100}%`;   //this update the width of progress bar based on % of tasks completed.
+  } else {
+    progressBar.style.width = "0%";
+  }
+
+  progressCount.textContent = `${completed} / ${total}`;  //updates text showing how many tasks are done out of total.
+
+  if (total > 0 && completed === total) {
+    congrats.style.display = "block";          // if all tasks are completed it shows congratulations msg.
+  } else {
+    congrats.style.display = "none";          // if not, it hides msg.
+  }
+}
+
+function renderTasks() {
+  taskList.innerHTML = "";
+  tasks.forEach((task, index) => {
+    const li = document.createElement("li");
+    li.className = "task";
+    li.innerHTML = `
+      <label>
+        <input type="checkbox" ${task.done ? "checked" : ""} onchange="toggleTask(${index})"/>
+        <span style="${task.done ? 'text-decoration: line-through;' : ''}">${task.text}</span>
+      </label>
+      <button onclick="deleteTask(${index})">🗑</button>
+    `;
+    taskList.appendChild(li);    //adds the created task item to the list and update the progress bar.
+  });
+
+  updateProgress();
+}
+
+function addTask() {
+  const taskText = taskInput.value.trim();
+  if (taskText !== "") {
+    tasks.push({ text: taskText, done: false });
+    taskInput.value = "";
+    renderTasks();
+  }
+}
+
+function toggleTask(index) {
+  tasks[index].done = !tasks[index].done;
+  renderTasks();
+}
+
+function deleteTask(index) {     //removes task from array usig .splice()
+  tasks.splice(index, 1);
+  renderTasks();                    // re-render the updated list.
+}
+
+addTaskBtn.addEventListener("click", addTask);   // when + button is clicked, it adds the task.
+
+taskInput.addEventListener("keypress", function (e) {
+  if (e.key === "Enter") addTask();                     // when you press enter inside the input box, it adds the task(just like the + button).
+});
+
+renderTasks();
+  </script>
+</body>
+</html>
+  
